@@ -3,9 +3,9 @@
 namespace App\Filament\Pages;
 
 use App\Models\User;
-use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -27,15 +27,10 @@ class AuthorsPage extends Page implements HasActions, HasForms
         return User::all();
     }
 
-    public function editAction(): Action
+    public function editAction(): EditAction
     {
-        return Action::make('edit')
-            ->mountUsing(function (Action $action, array $arguments): void {
-                // Resolve
-                $record = User::find($arguments['id']);
-                // I'm guessing this, this will not work.
-                $action->record($record);
-            })
+        return EditAction::make('edit')
+            ->record(fn (array $arguments) => User::findOrFail($arguments['id']))
             ->form([
                 TextInput::make('title'),
                 Repeater::make('books')

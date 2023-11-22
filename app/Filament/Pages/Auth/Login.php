@@ -2,20 +2,36 @@
 
 namespace App\Filament\Pages\Auth;
 
-use Filament\Forms\Components\Component;
+use App\Models\User;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\Placeholder;
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Pages\Auth\Login as FilamentLogin;
 
 class Login extends FilamentLogin
 {
-    protected function getEmailFormComponent(): Component
+    protected function getForms(): array
     {
-        return parent::getEmailFormComponent()
-            ->default('saade@laravel.local');
+        return [
+            'form' => $this->form(
+                $this->makeForm()->schema([
+                    Placeholder::make('Click the button below'),
+                ]),
+            ),
+        ];
     }
 
-    protected function getPasswordFormComponent(): Component
+    public function authenticate(): ?LoginResponse
     {
-        return parent::getPasswordFormComponent()
-            ->default('123123123');
+        $user = User::inRandomOrder()->first();
+
+        Filament::auth()->attempt([
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        session()->regenerate();
+
+        return app(LoginResponse::class);
     }
 }
